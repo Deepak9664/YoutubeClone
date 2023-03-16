@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { closeMenu } from '../Utils/appSlice'
+import CommentsContainer from './CommentsContainer'
 
 const Watchpage = () => {
 const [searcgParams]=useSearchParams();
@@ -13,6 +14,7 @@ const [searcgParams]=useSearchParams();
 dispatch(closeMenu())
     },[])
   return (
+    <div className='flex flex-row'>
     <div className='px-5'>
     <iframe width="1200" height="600" src={"https://www.youtube.com/embed/"+searcgParams.get("v")}
     title="YouTube video player" 
@@ -21,6 +23,8 @@ dispatch(closeMenu())
     allowFullscreen>
 
     </iframe>
+    <CommentsContainer/>
+    </div>
     </div>
   )
 }

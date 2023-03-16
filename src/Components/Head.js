@@ -1,17 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { json } from "react-router-dom";
 import { toggleMenu } from "../Utils/appSlice";
 import { YOUTUBE_SEARCH_API } from "../Utils/Constants";
+import { cacheResults } from "../Utils/searchSlice";
+import store from "../Utils/Store";
 const Head = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const[suggestions,setSuggestion]=useState([]);
-  const[showsuggestion,setshowSuggestion]=useState(false);
+  const[showSuggestion,setshowSuggestion]=useState(false);
+  const searchCache=useSelector((store)=>store.search)
+  const dispatch=useDispatch()
   useEffect(() => {
     //api call
     //make an api call after evrykeypress
     //but if the difference between 2 api call is <200 ms
     //decline the api call
-   const Timer= setTimeout(() => getSearchapisuggestion(), 200);
+    /**
+     * search Ccahe={
+     * "iphone":["iphone","iphone14"]
+     * searchquery=iphone
+     * }
+     */
+   const Timer= setTimeout(() => {
+    if(searchCache[searchQuery]){
+      setSuggestion(searchCache[searchQuery])
+    }else{
+      getSearchapisuggestion(json[1])
+    }
+  }, 200);
     return ()=>{
       clearTimeout(Timer)
     }
@@ -36,9 +53,13 @@ const Head = () => {
     const json = await data.json();
     // console.log("JSON", json[1]);
     setSuggestion(json[1])
+    /**if not present in cache */
+    dispatch(cacheResults({
+      [searchQuery]:json[1]
+    }))
   };
 
-  const dispatch = useDispatch();
+  
   const Togglemenu = () => {
     dispatch(toggleMenu());
   };
@@ -64,15 +85,15 @@ const Head = () => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={()=>setshowSuggestion(true)}
-          onBlur={()=>setshowSuggestion(false)}
+           onFocus={()=>setshowSuggestion(true)}
+           onBlur={()=>setshowSuggestion(false)}
           
         />
         <button className="border border-gray-400 px-5 py-2 rounded-r-full bg-slate-100">
           Search
         </button>
         </div>
-        {showsuggestion && (
+        {showSuggestion && (
         <div className="fixed bg-white py-2 px-2 w-[39rem] shadow-lg rounded-lg  border gray-100" >
           <ul>
             {suggestions.map((suggest)=><li key={suggest} className=" py-2 px-3 shadow-sm hover:bg-gray-100">
